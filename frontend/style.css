@@ -245,3 +245,197 @@ body {
   cursor: pointer; font-size: .75rem; margin-left: .6rem;
 }
 .btn-logout:hover { background: rgba(239,68,68,.35); }
+
+/* ====== Modal de Compra Exitosa (Mejorado) ====== */
+.purchase-modal {
+    text-align: center;
+    padding: 2.5rem 2rem;
+    max-width: 400px;
+    animation: modalPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+#modalCompra {
+    animation: fadeInOverlay 0.3s ease-out forwards;
+}
+
+.purchase-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    display: inline-block;
+    animation: bounceIcon 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.2s both;
+}
+
+.purchase-modal h2 {
+    color: #fff;
+    font-size: 1.5rem;
+    margin-bottom: 0.3rem;
+    animation: slideUpText 0.4s ease-out 0.1s both;
+}
+
+.purchase-subtitle {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+    animation: slideUpText 0.4s ease-out 0.2s both;
+}
+
+.purchase-details {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 1.2rem;
+    margin-bottom: 1.5rem;
+    animation: slideUpText 0.4s ease-out 0.3s both;
+}
+
+.purchase-details h3 {
+    color: var(--accent-amber);
+    font-size: 1.2rem;
+    margin-bottom: 0.2rem;
+}
+
+.purchase-details p {
+    color: var(--text-main);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.purchase-specs {
+    display: flex;
+    justify-content: center;
+    gap: 0.8rem;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    padding-top: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.purchase-modal .btn-primary {
+    animation: slideUpText 0.4s ease-out 0.4s both;
+}
+
+/* --- KEYFRAMES (Las animaciones) --- */
+@keyframes fadeInOverlay {
+    from { opacity: 0; backdrop-filter: blur(0px); }
+    to { opacity: 1; backdrop-filter: blur(10px); }
+}
+
+@keyframes modalPopIn {
+    from { opacity: 0; transform: scale(0.8) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes bounceIcon {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideUpText {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ====== Modal de Confirmación de Compra ====== */
+.confirmation-modal {
+    text-align: center;
+    max-width: 380px;
+    animation: modalPopIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.confirmation-modal h2 {
+    font-size: 1.4rem;
+    margin-bottom: 0.2rem;
+}
+
+.confirm-subtitle {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+}
+
+.confirm-img-wrapper {
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 1rem auto;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid var(--accent-amber);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+}
+
+.confirm-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.confirm-details h3 {
+    color: #fff;
+    font-size: 1.2rem;
+    margin-bottom: 0.2rem;
+}
+
+.confirm-details p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+/* --- NUEVOS ESTILOS PARA LAS ESPECIFICACIONES --- */
+.confirm-specs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    background: rgba(0,0,0,0.3);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.spec-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.spec-item span {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.1rem;
+}
+
+.spec-item strong {
+    color: var(--text-main);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.confirm-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.confirm-price {
+    color: var(--success);
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 0.8rem;
+    margin-top: 1.5rem;
+}
