@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="VinylFlow — Sistema de gestión de inventario de discos de vinilo.">
+    <title>Sonido Auténtico del Vinilo - La Tienda del Disco de Vinyl</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+    <!-- Pantalla de Bienvenida -->
+    <div id="welcomeScreen" class="welcome-screen">
+        <div class="welcome-content">
+            <div class="welcome-logo-disc"></div>
+            <h1 class="welcome-title">VinylFlow<span>"Música de Calidad"</span></h1>
+            <p class="welcome-subtitle">La Tienda del Disco de Vinyl — Experiencia Analógica</p>
+            <div class="mac-loader">
+                <div class="loader-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="animated-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="app-container">
+
+        <!-- Header / Navbar -->
+        <header class="main-header">
+            <div class="mac-dots">
+                <span class="dot dot-red"></span>
+                <span class="dot dot-yellow"></span>
+                <span class="dot dot-green"></span>
+            </div>
+            <div class="logo-container">
+                <h1>Vinilo<span>Flow</span>
+                    <small style="font-size:0.7rem; color:var(--text-muted); display:block;">
+                        La Tienda del Disco de Vinyl
+                    </small>
+                </h1>
+            </div>
+            <nav class="nav-bar">
+                <button class="nav-btn active" id="navInventario" onclick="cambiarVista('inventario')">Inventario (Empleado)</button>
+                <button class="nav-btn warning admin-only" id="navAlertas" onclick="cambiarVista('alertas')">Alertas Stock (Admin)</button>
+                <button class="nav-btn" id="navReportes" onclick="cambiarVista('reportes')">Reportes (PDF/Excel)</button>
+            </nav>
+            <div class="user-profile">
+                <span class="badge-role" id="userRole">Rol: —</span>
+                <span class="user-id" id="userInfo">—</span>
+                <button class="btn-logout" onclick="Auth.logout()">Salir</button>
+            </div>
+        </header>
+
+        <!-- Contenido Central Dinámico -->
+        <main class="content-body">
+
+            <!-- INVENTARIO (Catálogo Principal) -->
+            <div id="vistaInventario" class="view-section active-view">
+
+                <!-- Panel de Control -->
+                <section class="dashboard-stats">
+                    <div class="stat-card">
+                        <h3>Inventario</h3>
+                        <p>Stock Total: <strong id="total-stock">0 Unidades</strong> |
+                           Total Registrados: <strong id="total-items">0</strong></p>
+                    </div>
+                    <div class="stat-alert warning-box">
+                        <span class="alert-icon">⚠️</span>
+                        <span>Alertas (StockBajo): <strong id="low-stock-count">0 Vinilo requiere reabastecimiento</strong></span>
+                    </div>
+                </section>
+
+                <!-- Barra de Búsqueda y Filtros -->
+                <section class="filters-section">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Buscar vinilo por artista, título o sello discográfico...">
+                    </div>
+                    <div class="filter-dropdowns">
+                        <select id="genreFilter">
+                            <option value="todos">Género: Todos</option>
+                            <option value="Rock">Rock</option>
+                            <option value="Jazz">Jazz</option>
+                            <option value="Pop">Pop</option>
+                            <option value="Pop">Trap</option>
+                            <option value="Indie">Indie</option>
+                        </select>
+                        <select id="conditionFilter">
+                            <option value="todos">Estado Físico: Todos</option>
+                            <option value="Nuevo">Nuevo (Sellado)</option>
+                            <option value="Excelente">Usado (Excelente)</option>
+                            <option value="Buen Estado">Buen Estado</option>
+                        </select>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-primary admin-only" onclick="abrirModalRegistro()">Registrar Vinilo</button>
+                        <button class="btn-secondary" onclick="generarPDF()">Generar PDF</button>
+                    </div>
+                </section>
+
+                <section class="catalog-grid" id="catalogGrid">
+                    <!-- Se llena dinámicamente desde MySQL -->
+                </section>
+            </div>
+
+            <!-- VISTA 2: ALERTAS DE STOCK (Administrador) -->
+            <div id="vistaAlertas" class="view-section" style="display: none;">
+                <div class="section-header-title">
+                    <h2>Panel de Alertas de Stock (Administrador)</h2>
+                    <p>Monitoreo automático de títulos.</p>
+                </div>
+                <div class="alert-management-container" id="alertContainer"></div>
+            </div>
+
+            <!-- VISTA 3: REPORTES Y VENTAS -->
+            <div id="vistaReportes" class="view-section" style="display: none;">
+                <div class="section-header-title">
+                    <h2>Módulo de Reportes y Exportación Profesional</h2>
+                    <p>Descarga directa de los registros de la tienda en formatos PDF y Excel.</p>
+                </div>
+                <div class="reports-grid">
+                    <div class="report-card">
+                        <h3>Reporte General de Inventario (PDF)</h3>
+                        <p>Genera un documento con la lista completa de discos, géneros y existencias actuales.</p>
+                        <button class="btn-primary" onclick="generarPDF()">Descargar PDF Oficial 📄</button>
+                    </div>
+                    <div class="report-card">
+                        <h3>Exportar Base de Datos (Excel)</h3>
+                        <p>Descarga un archivo compatible con hojas de cálculo para control administrativo.</p>
+                        <button class="btn-secondary" onclick="exportarExcel()">Descargar Excel 📊</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- CREADORES DE NUESTRO PROYECTO -->
+        <footer class="creators-footer">
+            <h2>Conoce al Equipo de Desarrollo - Sonido Auténtico del Vinilo</h2>
+            <p class="creators-subtitle">Impulsando la gestión cultural</p>
+
+            <div class="creators-grid">
+                <div class="creator-card">
+                    <div class="creator-img-wrapper">
+                        <img src="AlexadelCarmen.png" alt="Alexa del Carmen Ramírez Gómez">
+                    </div>
+                    <h3>Alexa del Carmen Ramírez Gómez</h3>
+                    <span class="creator-role">Equipo de Desarrollo</span>
+                    <p class="creator-desc">Diseño de interfaz web, wireframes y experiencia de usuario frontend.</p>
+                </div>
+
+                <div class="creator-card">
+                    <div class="creator-img-wrapper">
+                        <img src="JuanPablo.jpeg" alt="Juan Pablo López Gómez">
+                    </div>
+                    <h3>Juan Pablo López Gómez</h3>
+                    <span class="creator-role">Equipo de Desarrollo</span>
+                    <p class="creator-desc">Arquitectura de base de datos y desarrollo de lógica backend CRUD.</p>
+                </div>
+
+                <div class="creator-card">
+                    <div class="creator-img-wrapper">
+                        <img src="Mariana.jpeg" alt="Mariana Yamile Alvarez Camacho">
+                    </div>
+                    <h3>Mariana Yamile Alvarez Camacho</h3>
+                    <span class="creator-role">Product Owner (PO)</span>
+                    <p class="creator-desc">Gestión de Product Backlog, validación y control de historias de usuario.</p>
+                </div>
+
+                <div class="creator-card">
+                    <div class="creator-img-wrapper">
+                        <img src="Fedro.png" alt="Fedro Rojas Plata">
+                    </div>
+                    <h3>Fedro Rojas Plata</h3>
+                    <span class="creator-role">Scrum Master (SM)</span>
+                    <p class="creator-desc">Configuración de tableros Jira, facilitación de sprints y flujos ágiles.</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Sonido Auténtico del Vinilo - La Tienda del Disco de Vinyl. Todos los derechos reservados.</p>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- MODAL REGISTRAR / MODIFICAR VINILO -->
+    <div id="modalVinilo" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h2 id="modalTitle">Registrar Nuevo Vinilo</h2>
+            <form id="formVinilo" onsubmit="guardarVinilo(event)">
+                <input type="hidden" id="viniloId">
+
+                <div class="form-group">
+                    <label for="inputTitulo">Título del Álbum:</label>
+                    <input type="text" id="inputTitulo" required placeholder="Ej. Thriller">
+                </div>
+                <div class="form-group">
+                    <label for="inputArtista">Artista:</label>
+                    <input type="text" id="inputArtista" required placeholder="Ej. Michael Jackson">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="inputAnio">Año:</label>
+                        <input type="number" id="inputAnio" required placeholder="1982">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputSello">Sello Discográfico:</label>
+                        <input type="text" id="inputSello" required placeholder="Epic Records">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="inputGenero">Género:</label>
+                        <select id="inputGenero">
+                            <option value="Rock">Rock</option>
+                            <option value="Jazz">Jazz</option>
+                            <option value="Pop">Pop</option>
+                            <option value="Pop">Trap</option>
+                            <option value="Indie">Indie</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputEstado">Estado Físico:</label>
+                        <select id="inputEstado">
+                            <option value="Nuevo (Sellado)">Nuevo (Sellado)</option>
+                            <option value="Usado (Excelente)">Usado (Excelente)</option>
+                            <option value="Buen Estado">Buen Estado</option>
+                            <option value="Detalle Estético">Detalle Estético</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="inputTamano">Tamaño / Formato:</label>
+                        <input type="text" id="inputTamano" value="12&quot; LP" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputStock">Stock Disponible (Unidades):</label>
+                        <input type="number" id="inputStock" min="0" value="5" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="inputPrecio">Precio (USD):</label>
+                    <input type="number" id="inputPrecio" min="0" step="0.01" value="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="inputImagen">URL de Imagen (Opcional):</label>
+                    <input type="url" id="inputImagen" placeholder="https://images.unsplash.com/...">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar Registro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="auth.js"></script>
+<script src="admin.js"></script>  
+</body>
+</html>

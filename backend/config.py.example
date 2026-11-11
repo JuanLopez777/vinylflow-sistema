@@ -1,0 +1,18 @@
+import os
+from datetime import timedelta
+
+class Config:
+    MYSQL_HOST     = os.getenv("MYSQL_HOST", "localhost")
+    MYSQL_USER     = os.getenv("MYSQL_USER", "root")  # <- Agregado
+    MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "TU_CONTRASEÑA_AQUI")
+    MYSQL_DB       = os.getenv("MYSQL_DB", "vinylflow")
+    
+    # Solo debe haber UNA línea de JWT_SECRET_KEY y sin tu clave real
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "TU_CLAVE_SECRETA_AQUI") 
+    
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=8)
+    FRONTEND_DIR = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "frontend")
+    )
+    //a la hora d clonar este proyecto renoombra el archico en el nombre config.py 
+    

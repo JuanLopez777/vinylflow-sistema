@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda VinylFlow</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="animated-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Header del Comprador -->
+        <header class="main-header">
+            <div class="logo-container">
+                <h1>Vinyl<span>Flow</span> <small style="font-size:0.7rem; color:var(--text-muted); display:block;">Tienda para Coleccionistas</small></h1>
+            </div>
+            <div class="user-profile" style="display:flex; align-items:center;">
+                <span class="badge-role" style="background:var(--success);">Rol: Comprador</span>
+                <span class="user-id" id="userInfo" style="margin-left:10px;">—</span>
+                <button class="btn-logout" onclick="Auth.logout()">Salir</button>
+            </div>
+        </header>
+
+        <main class="content-body">
+            <div class="section-header-title">
+                <h2>Catálogo de Vinilos</h2>
+                <p>Encuentra tu próximo disco favorito y simula tu compra.</p>
+            </div>
+
+            <!-- Buscador -->
+            <section class="filters-section" style="grid-template-columns: 2fr 1fr;">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Buscar vinilo por artista, título o sello...">
+                </div>
+                <div class="filter-dropdowns">
+                    <select id="genreFilter">
+                        <option value="todos">Género: Todos</option>
+                        <option value="Rock">Rock</option>
+                        <option value="Jazz">Jazz</option>
+                        <option value="Pop">Pop</option>
+                        <option value="Indie">Indie</option>
+                        <option value="Hip-Hop">Hip-Hop</option>
+                        <option value="Electrónica">Electrónica</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Catálogo -->
+            <section class="catalog-grid" id="catalogGrid">
+                <!-- Se llena desde comprador.js -->
+            </section>
+        </main>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="comprador.js"></script>
+</body>
+</html>

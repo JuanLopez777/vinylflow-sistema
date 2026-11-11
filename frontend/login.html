@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VinyFlow · Acceso</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="animated-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <h1 class="auth-title">Viny<span>Flow</span></h1>
+      <p class="auth-subtitle">La Tienda del Disco de VinyFlow</p>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Iniciar sesión</button>
+        <button class="auth-tab" data-tab="register">Registrarse <br>(Nuevo comprador)</button>
+      </div>
+
+      <form id="formLogin" class="auth-form">
+        <div class="form-group">
+          <label for="loginEmail">Correo:</label>
+          <input type="email" id="loginEmail" required placeholder="usuario@vinylflow.com">
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Contraseña:</label>
+          <input type="password" id="loginPassword" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn-primary auth-submit">Entrar</button>
+        <p id="loginMsg" class="auth-msg"></p>
+      </form>
+
+      <form id="formRegister" class="auth-form" style="display:none;">
+        <div class="form-group">
+          <label for="regNombre">Nombre completo:</label>
+          <input type="text" id="regNombre" required>
+        </div>
+        <div class="form-group">
+          <label for="regEmail">Correo:</label>
+          <input type="email" id="regEmail" required>
+        </div>
+        <div class="form-group">
+          <label for="regPassword">Contraseña (mín. 6):</label>
+          <input type="password" id="regPassword" minlength="6" required>
+        </div>
+        <button type="submit" class="btn-primary auth-submit">Crear cuenta</button>
+        <p id="registerMsg" class="auth-msg"></p>
+      </form>
+
+      <p class="auth-hint">Sistema local</p>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="login.js"></script>
+</body>
+</html>
