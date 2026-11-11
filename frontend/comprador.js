@@ -73,7 +73,7 @@ function renderizarInventario(lista = inventarioVinilos) {
           </strong>
         </div>
         <div class="card-actions">
-          <button class="btn-primary" style="width:100%;" ${agotado ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''} onclick="simularCompra(${v.id}, '${escapeHTML(v.titulo)}')">
+          <button class="btn-primary" style="width:100%;" ${agotado ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''} onclick="simularCompra(${v.id})">
             ${agotado ? 'Sin Stock' : '🛒 Comprar Vinilo'}
           </button>
         </div>
@@ -104,19 +104,71 @@ function configurarFiltros() {
   genreFilter.addEventListener("change", aplicarFiltros);
 }
 
-async function simularCompra(id, titulo) {
-  if (!confirm(`¿Estás seguro de que deseas comprar "${titulo}"?`)) return;
+// ==========================================
+// --- LÓGICA DE COMPRA EN 2 PASOS ---
+// ==========================================
+
+// PASO 1: Abrir el modal de confirmación
+function simularCompra(id) {
+  const v = inventarioVinilos.find(item => item.id == id);
+  if (!v) return;
+
+  // Llenar el modal de confirmación con TODOS los datos del vinilo
+  document.getElementById("confirmCompraImagen").src = v.imagen || "https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?auto=format&fit=crop&w=400&q=80";
+  document.getElementById("confirmCompraTitulo").textContent = v.titulo;
+  document.getElementById("confirmCompraArtista").textContent = v.artista;
+  
+  // Nuevas líneas para las especificaciones:
+  document.getElementById("confirmCompraAnio").textContent = v.anio;
+  document.getElementById("confirmCompraSello").textContent = v.sello;
+  document.getElementById("confirmCompraGenero").textContent = v.genero;
+  document.getElementById("confirmCompraEstado").textContent = v.estado;
+  
+  document.getElementById("confirmCompraFormato").textContent = v.tamano;
+  document.getElementById("confirmCompraPrecio").textContent = `$${Number(v.precio).toFixed(2)}`;
+
+  // Asignar la acción al botón de "Confirmar Compra"
+  document.getElementById("btnConfirmarDefinitivo").onclick = () => ejecutarCompraReal(id, v);
+
+  // Mostrar el modal
+  document.getElementById("modalConfirmacion").style.display = "flex";
+}
+
+// Cerrar el modal de confirmación (si el usuario cancela)
+function cerrarModalConfirmacion() {
+  document.getElementById("modalConfirmacion").style.display = "none";
+}
+
+// PASO 2: Ejecutar la compra real si el usuario confirma
+async function ejecutarCompraReal(id, viniloData) {
+  cerrarModalConfirmacion(); // Cerramos el modal de confirmación
 
   try {
+    // Llamar al backend para descontar el stock
     const res = await apiFetch(`/vinilos/${id}/comprar`, { method: "POST" });
     const data = await res.json();
     
     if (!res.ok) throw new Error(data.msg);
 
-    alert(data.msg); // Mensaje de éxito del backend
-    await cargarVinilos(); // Refresca el catálogo para ver el stock descontado
+    // Llenar el modal de ÉXITO (Recibo)
+    document.getElementById("compraTitulo").textContent = viniloData.titulo;
+    document.getElementById("compraArtista").textContent = viniloData.artista;
+    document.getElementById("compraFormato").textContent = viniloData.tamano;
+    document.getElementById("compraCantidad").textContent = "1 Unidad";
+    document.getElementById("compraPrecio").textContent = `$${Number(viniloData.precio).toFixed(2)}`;
+
+    // Mostrar el modal de éxito
+    document.getElementById("modalCompra").style.display = "flex";
+
+    // Refrescar el catálogo en segundo plano para ver el nuevo stock
+    await cargarVinilos(); 
     
   } catch (err) {
-    alert("Error: " + err.message);
+    alert("Error al procesar la compra: " + err.message);
   }
+}
+
+// Cerrar el modal de éxito (botón "Seguir comprando")
+function cerrarModalCompra() {
+  document.getElementById("modalCompra").style.display = "none";
 }

@@ -58,6 +58,67 @@
         </main>
     </div>
 
+    <!-- MODAL DE CONFIRMACIÓN DE COMPRA -->
+    <div id="modalConfirmacion" class="modal-overlay" style="display: none;">
+        <div class="modal-content confirmation-modal">
+            <h2>Confirmar Compra</h2>
+            <p class="confirm-subtitle">Revisa los detalles antes de continuar</p>
+            
+            <div class="confirm-img-wrapper">
+                <img id="confirmCompraImagen" src="" alt="Portada del Vinilo">
+            </div>
+            
+            <div class="confirm-details">
+                <h3 id="confirmCompraTitulo">Álbum</h3>
+                <p id="confirmCompraArtista">Artista</p>
+                
+                <!-- Cuadrícula de especificaciones -->
+                <div class="confirm-specs">
+                    <div class="spec-item"><span>Año:</span> <strong id="confirmCompraAnio">1982</strong></div>
+                    <div class="spec-item"><span>Sello:</span> <strong id="confirmCompraSello">Epic</strong></div>
+                    <div class="spec-item"><span>Género:</span> <strong id="confirmCompraGenero">Pop</strong></div>
+                    <div class="spec-item"><span>Estado:</span> <strong id="confirmCompraEstado">Nuevo</strong></div>
+                    <div class="spec-item"><span>Formato:</span> <strong id="confirmCompraFormato">12" LP</strong></div>
+                    <div class="spec-item"><span>Cantidad:</span> <strong>1 Unidad</strong></div>
+                </div>
+
+                <!-- Sección del precio total -->
+                <div class="confirm-total">
+                    <span>Total a pagar:</span>
+                    <strong class="confirm-price" id="confirmCompraPrecio">$0.00</strong>
+                </div>
+            </div>
+
+            <div class="confirm-actions">
+                <button class="btn-secondary" onclick="cerrarModalConfirmacion()" style="flex: 1;">Cancelar</button>
+                <button class="btn-primary" id="btnConfirmarDefinitivo" style="flex: 1;">Confirmar Compra</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE COMPRA EXITOSA -->
+    <div id="modalCompra" class="modal-overlay" style="display: none;">
+        <div class="modal-content purchase-modal">
+            <div class="purchase-icon">🎉</div>
+            <h2>¡Gracias por tu compra!</h2>
+            <p class="purchase-subtitle">Tu pedido ha sido procesado con éxito.</p>
+            
+            <div class="purchase-details">
+                <h3 id="compraTitulo">Álbum</h3>
+                <p id="compraArtista">Artista</p>
+                <div class="purchase-specs">
+                    <span id="compraFormato">12" LP</span>
+                    <span>|</span>
+                    <span id="compraCantidad">1 Unidad</span>
+                    <span>|</span>
+                    <span id="compraPrecio" style="color: var(--success); font-weight: bold;">$0.00</span>
+                </div>
+            </div>
+
+            <button class="btn-primary" onclick="cerrarModalCompra()" style="width: 100%;">Seguir comprando</button>
+        </div>
+    </div>
+
     <script src="auth.js"></script>
     <script src="comprador.js"></script>
 </body>
