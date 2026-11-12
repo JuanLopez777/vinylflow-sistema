@@ -7,15 +7,11 @@
     <title>Sonido Auténtico del Vinilo - La Tienda del Disco de Vinyl</title>
 
     <link rel="stylesheet" href="style.css">
-
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
-
-    <!-- Pantalla de Bienvenida -->
     <div id="welcomeScreen" class="welcome-screen">
         <div class="welcome-content">
             <div class="welcome-logo-disc"></div>
@@ -34,8 +30,6 @@
     </div>
 
     <div class="app-container">
-
-        <!-- Header / Navbar -->
         <header class="main-header">
             <div class="mac-dots">
                 <span class="dot dot-red"></span>
@@ -50,6 +44,7 @@
                 </h1>
             </div>
             <nav class="nav-bar">
+                <button class="nav-btn" id="navVentas" onclick="cambiarVista('ventas')">Historial de Ventas</button>
                 <button class="nav-btn active" id="navInventario" onclick="cambiarVista('inventario')">Inventario (Empleado)</button>
                 <button class="nav-btn warning admin-only" id="navAlertas" onclick="cambiarVista('alertas')">Alertas Stock (Admin)</button>
                 <button class="nav-btn" id="navReportes" onclick="cambiarVista('reportes')">Reportes (PDF/Excel)</button>
@@ -61,16 +56,11 @@
             </div>
         </header>
 
-        <!-- Contenido Central Dinámico -->
         <main class="content-body">
-
-            <!-- INVENTARIO (Catálogo Principal) -->
             <div id="vistaInventario" class="view-section active-view">
-
-                <!-- Panel de Control -->
                 <section class="dashboard-stats">
                     <div class="stat-card">
-                        <h3>Inventario</h3>
+                        <h3>Inventario Global</h3>
                         <p>Stock Total: <strong id="total-stock">0 Unidades</strong> |
                            Total Registrados: <strong id="total-items">0</strong></p>
                     </div>
@@ -80,7 +70,6 @@
                     </div>
                 </section>
 
-                <!-- Barra de Búsqueda y Filtros -->
                 <section class="filters-section">
                     <div class="search-box">
                         <input type="text" id="searchInput" placeholder="Buscar vinilo por artista, título o sello discográfico...">
@@ -91,7 +80,7 @@
                             <option value="Rock">Rock</option>
                             <option value="Jazz">Jazz</option>
                             <option value="Pop">Pop</option>
-                            <option value="Pop">Trap</option>
+                            <option value="Trap">Trap</option>
                             <option value="Indie">Indie</option>
                         </select>
                         <select id="conditionFilter">
@@ -108,11 +97,17 @@
                 </section>
 
                 <section class="catalog-grid" id="catalogGrid">
-                    <!-- Se llena dinámicamente desde MySQL -->
+                    <!-- Se llena dinámicamente -->
                 </section>
+
+                <!-- CONTROLES DE PAGINACIÓN -->
+                <div id="pagination" class="pagination-container">
+                    <button class="btn-secondary pagination-btn" id="btnPrev" onclick="cambiarPagina(-1)">Anterior</button>
+                    <span id="pageInfo" class="page-info">Página 1</span>
+                    <button class="btn-secondary pagination-btn" id="btnNext" onclick="cambiarPagina(1)">Siguiente</button>
+                </div>
             </div>
 
-            <!-- VISTA 2: ALERTAS DE STOCK (Administrador) -->
             <div id="vistaAlertas" class="view-section" style="display: none;">
                 <div class="section-header-title">
                     <h2>Panel de Alertas de Stock (Administrador)</h2>
@@ -121,7 +116,6 @@
                 <div class="alert-management-container" id="alertContainer"></div>
             </div>
 
-            <!-- VISTA 3: REPORTES Y VENTAS -->
             <div id="vistaReportes" class="view-section" style="display: none;">
                 <div class="section-header-title">
                     <h2>Módulo de Reportes y Exportación Profesional</h2>
@@ -140,46 +134,55 @@
                     </div>
                 </div>
             </div>
-
+                        <!-- VISTA 4: HISTORIAL DE VENTAS -->
+            <div id="vistaVentas" class="view-section" style="display: none;">
+                <div class="section-header-title">
+                    <h2>Historial de Ventas</h2>
+                    <p>Registro cronológico de todas las compras realizadas por los clientes.</p>
+                </div>
+                <div style="overflow-x: auto; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid var(--glass-border); padding: 1rem;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--glass-border); color: var(--accent-amber);">
+                                <th style="padding: 1rem;">ID</th>
+                                <th style="padding: 1rem;">Fecha</th>
+                                <th style="padding: 1rem;">Vinilo</th>
+                                <th style="padding: 1rem;">Comprador</th>
+                                <th style="padding: 1rem;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaVentasBody">
+                            <!-- Se llena dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </main>
 
-        <!-- CREADORES DE NUESTRO PROYECTO -->
         <footer class="creators-footer">
             <h2>Conoce al Equipo de Desarrollo - Sonido Auténtico del Vinilo</h2>
             <p class="creators-subtitle">Impulsando la gestión cultural</p>
-
             <div class="creators-grid">
                 <div class="creator-card">
-                    <div class="creator-img-wrapper">
-                        <img src="AlexadelCarmen.png" alt="Alexa del Carmen Ramírez Gómez">
-                    </div>
+                    <div class="creator-img-wrapper"><img src="AlexadelCarmen.png" alt="Alexa del Carmen Ramírez Gómez"></div>
                     <h3>Alexa del Carmen Ramírez Gómez</h3>
                     <span class="creator-role">Equipo de Desarrollo</span>
                     <p class="creator-desc">Diseño de interfaz web, wireframes y experiencia de usuario frontend.</p>
                 </div>
-
                 <div class="creator-card">
-                    <div class="creator-img-wrapper">
-                        <img src="JuanPablo.jpeg" alt="Juan Pablo López Gómez">
-                    </div>
+                    <div class="creator-img-wrapper"><img src="JuanPablo.jpeg" alt="Juan Pablo López Gómez"></div>
                     <h3>Juan Pablo López Gómez</h3>
                     <span class="creator-role">Equipo de Desarrollo</span>
                     <p class="creator-desc">Arquitectura de base de datos y desarrollo de lógica backend CRUD.</p>
                 </div>
-
                 <div class="creator-card">
-                    <div class="creator-img-wrapper">
-                        <img src="Mariana.jpeg" alt="Mariana Yamile Alvarez Camacho">
-                    </div>
+                    <div class="creator-img-wrapper"><img src="Mariana.jpeg" alt="Mariana Yamile Alvarez Camacho"></div>
                     <h3>Mariana Yamile Alvarez Camacho</h3>
                     <span class="creator-role">Product Owner (PO)</span>
                     <p class="creator-desc">Gestión de Product Backlog, validación y control de historias de usuario.</p>
                 </div>
-
                 <div class="creator-card">
-                    <div class="creator-img-wrapper">
-                        <img src="Fedro.png" alt="Fedro Rojas Plata">
-                    </div>
+                    <div class="creator-img-wrapper"><img src="Fedro.png" alt="Fedro Rojas Plata"></div>
                     <h3>Fedro Rojas Plata</h3>
                     <span class="creator-role">Scrum Master (SM)</span>
                     <p class="creator-desc">Configuración de tableros Jira, facilitación de sprints y flujos ágiles.</p>
@@ -189,16 +192,13 @@
                 <p>&copy; 2026 Sonido Auténtico del Vinilo - La Tienda del Disco de Vinyl. Todos los derechos reservados.</p>
             </div>
         </footer>
-
     </div>
 
-    <!-- MODAL REGISTRAR / MODIFICAR VINILO -->
     <div id="modalVinilo" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <h2 id="modalTitle">Registrar Nuevo Vinilo</h2>
             <form id="formVinilo" onsubmit="guardarVinilo(event)">
                 <input type="hidden" id="viniloId">
-
                 <div class="form-group">
                     <label for="inputTitulo">Título del Álbum:</label>
                     <input type="text" id="inputTitulo" required placeholder="Ej. Thriller">
@@ -207,7 +207,6 @@
                     <label for="inputArtista">Artista:</label>
                     <input type="text" id="inputArtista" required placeholder="Ej. Michael Jackson">
                 </div>
-
                 <div class="form-row">
                     <div class="form-group">
                         <label for="inputAnio">Año:</label>
@@ -218,7 +217,6 @@
                         <input type="text" id="inputSello" required placeholder="Epic Records">
                     </div>
                 </div>
-
                 <div class="form-row">
                     <div class="form-group">
                         <label for="inputGenero">Género:</label>
@@ -226,7 +224,7 @@
                             <option value="Rock">Rock</option>
                             <option value="Jazz">Jazz</option>
                             <option value="Pop">Pop</option>
-                            <option value="Pop">Trap</option>
+                            <option value="Trap">Trap</option>
                             <option value="Indie">Indie</option>
                         </select>
                     </div>
@@ -240,7 +238,6 @@
                         </select>
                     </div>
                 </div>
-
                 <div class="form-row">
                     <div class="form-group">
                         <label for="inputTamano">Tamaño / Formato:</label>
@@ -251,17 +248,14 @@
                         <input type="number" id="inputStock" min="0" value="5" required>
                     </div>
                 </div>
-
                 <div class="form-group">
                     <label for="inputPrecio">Precio (USD):</label>
                     <input type="number" id="inputPrecio" min="0" step="0.01" value="0" required>
                 </div>
-
                 <div class="form-group">
                     <label for="inputImagen">URL de Imagen (Opcional):</label>
                     <input type="url" id="inputImagen" placeholder="https://images.unsplash.com/...">
                 </div>
-
                 <div class="modal-actions">
                     <button type="button" class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
                     <button type="submit" class="btn-primary">Guardar Registro</button>
@@ -270,8 +264,7 @@
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="auth.js"></script>
-<script src="admin.js"></script>  
+    <script src="admin.js"></script>  
 </body>
 </html>

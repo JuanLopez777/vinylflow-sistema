@@ -439,3 +439,106 @@ body {
     gap: 0.8rem;
     margin-top: 1.5rem;
 }
+/* ====== Modal de Pasarela de Pago ====== */
+.payment-modal {
+    max-width: 420px;
+    animation: modalPopIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.payment-subtitle {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+}
+
+.payment-total-box {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px dashed var(--success);
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.payment-total-box span {
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+.payment-total-box strong {
+    color: var(--success);
+    font-size: 1.4rem;
+}
+
+/* Estilo para los inputs de tarjeta */
+.payment-modal input {
+    font-family: monospace; /* Fuente tipo código para los números */
+    letter-spacing: 1px;
+}
+
+/* ====== Validación de Pasarela de Pago ====== */
+.payment-modal input {
+    font-family: monospace;
+    letter-spacing: 1px;
+}
+
+/* Borde rojo si el campo tiene un error */
+.payment-modal input.error {
+    border-color: var(--danger);
+    background: rgba(239, 68, 68, 0.1);
+    animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.error-msg {
+    display: block;
+    color: var(--danger);
+    font-size: 0.75rem;
+    margin-top: 0.3rem;
+    min-height: 1rem; /* Para que no salte el diseño cuando aparece */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.error-msg.show {
+    opacity: 1;
+}
+
+input.error {
+    border-color: var(--danger) !important;
+}
+/* ====== Paginación ====== */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+}
+
+.pagination-btn {
+    padding: 0.5rem 1.2rem;
+    font-size: 0.85rem;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.page-info {
+    color: var(--text-main);
+    font-size: 0.9rem;
+    font-weight: 500;
+}

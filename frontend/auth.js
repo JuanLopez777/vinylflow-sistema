@@ -28,7 +28,16 @@ const Auth = {
     }
     return true;
   },
-  logout() {
+  async logout() {
+    try {
+      // Avisamos al backend para que queme el token en la lista negra
+      await fetch(API_BASE + "/auth/logout", { 
+        method: "POST", 
+        headers: this.headers() 
+      });
+    } catch (e) {
+      console.error("Error al cerrar sesión en el servidor", e);
+    }
     this.limpiar();
     window.location.href = "/login.html";
   },
