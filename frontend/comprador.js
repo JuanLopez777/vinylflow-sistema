@@ -1,4 +1,9 @@
 let inventarioVinilos = [];
+let intentoDePagoActual = null; 
+let viniloEnProceso = null;     
+let paginaActual = 1;
+let totalPaginas = 1;
+const VINILOS_POR_PAGINA = 6; // Cantidad de discos por página
 
 function escapeHTML(str) {
   return String(str ?? '').replace(/[&<>"']/g, s => ({
@@ -13,8 +18,6 @@ function debounce(fn, wait = 250) {
 
 document.addEventListener("DOMContentLoaded", async () => {
   if (!Auth.requerirLogin()) return;
-
-  // Proteger la ruta: si es admin, lo manda a su panel
   if (Auth.esAdmin()) { window.location.href = "/admin.html"; return; }
 
   const u = Auth.usuario;
@@ -24,14 +27,38 @@ document.addEventListener("DOMContentLoaded", async () => {
   await cargarVinilos();
 });
 
-async function cargarVinilos() {
+// --- PAGINACIÓN ---
+async function cargarVinilos(page = 1) {
   try {
-    const res = await apiFetch("/vinilos");
-    inventarioVinilos = await res.json();
+    const res = await apiFetch(`/vinilos?page=${page}&limit=${VINILOS_POR_PAGINA}`);
+    const json = await res.json();
+    
+    inventarioVinilos = json.data;
+    paginaActual = json.meta.current_page;
+    totalPaginas = json.meta.total_pages;
+
     renderizarInventario();
+    actualizarControlesPaginacion();
   } catch (err) {
     console.error("Error al cargar:", err);
   }
+}
+
+function cambiarPagina(direccion) {
+  const nuevaPagina = paginaActual + direccion;
+  if (nuevaPagina >= 1 && nuevaPagina <= totalPaginas) {
+    cargarVinilos(nuevaPagina);
+  }
+}
+
+function actualizarControlesPaginacion() {
+  const info = document.getElementById("pageInfo");
+  const prev = document.getElementById("btnPrev");
+  const next = document.getElementById("btnNext");
+
+  if (info) info.textContent = `Página ${paginaActual} de ${totalPaginas}`;
+  if (prev) prev.disabled = (paginaActual === 1);
+  if (next) next.disabled = (paginaActual === totalPaginas);
 }
 
 function renderizarInventario(lista = inventarioVinilos) {
@@ -39,7 +66,7 @@ function renderizarInventario(lista = inventarioVinilos) {
   grid.innerHTML = "";
 
   if (lista.length === 0) {
-    grid.innerHTML = `<p style="color: var(--text-muted); grid-column: 1/-1; text-align: center; padding: 2rem;">No se encontraron vinilos.</p>`;
+    grid.innerHTML = `<p style="color: var(--text-muted); grid-column: 1/-1; text-align: center; padding: 2rem;">No se encontraron vinilos en esta página.</p>`;
     return;
   }
 
@@ -104,71 +131,199 @@ function configurarFiltros() {
   genreFilter.addEventListener("change", aplicarFiltros);
 }
 
-// ==========================================
-// --- LÓGICA DE COMPRA EN 2 PASOS ---
-// ==========================================
-
-// PASO 1: Abrir el modal de confirmación
+// --- LÓGICA DE COMPRA ---
 function simularCompra(id) {
   const v = inventarioVinilos.find(item => item.id == id);
   if (!v) return;
 
-  // Llenar el modal de confirmación con TODOS los datos del vinilo
+  viniloEnProceso = v; 
   document.getElementById("confirmCompraImagen").src = v.imagen || "https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?auto=format&fit=crop&w=400&q=80";
   document.getElementById("confirmCompraTitulo").textContent = v.titulo;
   document.getElementById("confirmCompraArtista").textContent = v.artista;
-  
-  // Nuevas líneas para las especificaciones:
   document.getElementById("confirmCompraAnio").textContent = v.anio;
   document.getElementById("confirmCompraSello").textContent = v.sello;
   document.getElementById("confirmCompraGenero").textContent = v.genero;
   document.getElementById("confirmCompraEstado").textContent = v.estado;
-  
   document.getElementById("confirmCompraFormato").textContent = v.tamano;
   document.getElementById("confirmCompraPrecio").textContent = `$${Number(v.precio).toFixed(2)}`;
 
-  // Asignar la acción al botón de "Confirmar Compra"
-  document.getElementById("btnConfirmarDefinitivo").onclick = () => ejecutarCompraReal(id, v);
-
-  // Mostrar el modal
+  document.getElementById("btnConfirmarDefinitivo").onclick = solicitarTokenYPagar;
   document.getElementById("modalConfirmacion").style.display = "flex";
 }
 
-// Cerrar el modal de confirmación (si el usuario cancela)
 function cerrarModalConfirmacion() {
   document.getElementById("modalConfirmacion").style.display = "none";
 }
 
-// PASO 2: Ejecutar la compra real si el usuario confirma
-async function ejecutarCompraReal(id, viniloData) {
-  cerrarModalConfirmacion(); // Cerramos el modal de confirmación
-
+async function solicitarTokenYPagar() {
+  cerrarModalConfirmacion();
+  const btnConfirmar = document.getElementById("btnConfirmarDefinitivo");
+  
   try {
-    // Llamar al backend para descontar el stock
-    const res = await apiFetch(`/vinilos/${id}/comprar`, { method: "POST" });
+    btnConfirmar.textContent = "Validando stock...";
+    btnConfirmar.disabled = true;
+
+    const res = await apiFetch(`/vinilos/${viniloEnProceso.id}/intent`, { method: "POST" });
     const data = await res.json();
-    
     if (!res.ok) throw new Error(data.msg);
 
-    // Llenar el modal de ÉXITO (Recibo)
-    document.getElementById("compraTitulo").textContent = viniloData.titulo;
-    document.getElementById("compraArtista").textContent = viniloData.artista;
-    document.getElementById("compraFormato").textContent = viniloData.tamano;
-    document.getElementById("compraCantidad").textContent = "1 Unidad";
-    document.getElementById("compraPrecio").textContent = `$${Number(viniloData.precio).toFixed(2)}`;
+    intentoDePagoActual = data.payment_intent; 
 
-    // Mostrar el modal de éxito
-    document.getElementById("modalCompra").style.display = "flex";
+    document.getElementById("pagoTotalMonto").textContent = `$${Number(viniloEnProceso.precio).toFixed(2)}`;
+    document.getElementById("formPago").onsubmit = procesarPago;
+    document.getElementById("modalPago").style.display = "flex";
 
-    // Refrescar el catálogo en segundo plano para ver el nuevo stock
-    await cargarVinilos(); 
-    
   } catch (err) {
-    alert("Error al procesar la compra: " + err.message);
+    alert("No se puede iniciar el pago: " + err.message);
+  } finally {
+    btnConfirmar.textContent = "Confirmar Compra";
+    btnConfirmar.disabled = false;
   }
 }
 
-// Cerrar el modal de éxito (botón "Seguir comprando")
+function cerrarModalPago() {
+  document.getElementById("modalPago").style.display = "none";
+  intentoDePagoActual = null;
+}
+
+// --- FORMATEADORES Y VALIDACIONES ---
+function validarLuhn(numero) {
+  let suma = 0;
+  let alternar = false;
+  for (let i = numero.length - 1; i >= 0; i--) {
+    let digito = parseInt(numero.charAt(i), 10);
+    if (alternar) {
+      digito *= 2;
+      if (digito > 9) digito -= 9;
+    }
+    suma += digito;
+    alternar = !alternar;
+  }
+  return (suma % 10) === 0;
+}
+
+function formatearTarjeta(input) {
+  let valor = input.value.replace(/\D/g, ''); 
+  valor = valor.replace(/(.{4})/g, '$1 ').trim(); 
+  input.value = valor;
+  ocultarError("error-tarjeta", input);
+}
+
+function formatearFecha(input) {
+  let valor = input.value.replace(/\D/g, ''); 
+  if (valor.length >= 2) {
+    let mes = parseInt(valor.substring(0, 2));
+    if (mes > 12 || mes === 0) {
+      valor = valor.substring(0, 1); 
+    } else {
+      valor = valor.substring(0, 2) + '/' + valor.substring(2, 4);
+    }
+  }
+  input.value = valor;
+  ocultarError("error-fecha", input);
+}
+
+function formatearCVV(input) {
+  input.value = input.value.replace(/\D/g, '');
+  ocultarError("error-cvv", input);
+}
+
+function mostrarError(idSpan, input, mensaje) {
+  const span = document.getElementById(idSpan);
+  span.textContent = mensaje;
+  span.classList.add("show");
+  input.classList.add("error");
+}
+
+function ocultarError(idSpan, input) {
+  const span = document.getElementById(idSpan);
+  span.classList.remove("show");
+  input.classList.remove("error");
+}
+
+async function procesarPago(event) {
+  event.preventDefault();
+  
+  const inputTarjeta = document.getElementById("cardNumber");
+  const inputFecha = document.getElementById("cardExp");
+  const inputCvv = document.getElementById("cardCvv");
+  
+  let formularioValido = true;
+
+  const tarjetaLimpia = inputTarjeta.value.replace(/\s/g, '');
+  if (tarjetaLimpia.length !== 16) {
+    mostrarError("error-tarjeta", inputTarjeta, "Debe tener 16 dígitos.");
+    formularioValido = false;
+  } else if (!validarLuhn(tarjetaLimpia)) {
+    mostrarError("error-tarjeta", inputTarjeta, "Número de tarjeta inválido.");
+    formularioValido = false;
+  }
+
+  if (inputFecha.value.length !== 5) {
+    mostrarError("error-fecha", inputFecha, "Formato incompleto (MM/YY).");
+    formularioValido = false;
+  } else {
+    const hoy = new Date();
+    const mesActual = hoy.getMonth() + 1; 
+    const anioActual = parseInt(hoy.getFullYear().toString().slice(-2));
+    
+    const partes = inputFecha.value.split('/');
+    const mesIngresado = parseInt(partes[0]);
+    const anioIngresado = parseInt(partes[1]);
+
+    if (anioIngresado < anioActual || (anioIngresado === anioActual && mesIngresado < mesActual)) {
+      mostrarError("error-fecha", inputFecha, "La tarjeta está vencida.");
+      formularioValido = false;
+    } else if (anioIngresado > anioActual + 10) {
+      mostrarError("error-fecha", inputFecha, "Año de vencimiento muy lejano.");
+      formularioValido = false;
+    }
+  }
+
+  if (inputCvv.value.length !== 3) {
+    mostrarError("error-cvv", inputCvv, "Debe tener 3 dígitos.");
+    formularioValido = false;
+  }
+
+  if (!formularioValido) return; 
+
+  const btnPagar = document.getElementById("btnPagar");
+  btnPagar.textContent = "Conectando con el banco...";
+  btnPagar.disabled = true;
+  btnPagar.style.opacity = "0.7";
+
+  setTimeout(async () => {
+    try {
+      const res = await apiFetch(`/vinilos/${viniloEnProceso.id}/comprar`, { 
+        method: "POST",
+        body: JSON.stringify({ payment_intent: intentoDePagoActual })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.msg);
+
+      cerrarModalPago();
+      document.getElementById("formPago").reset();
+      
+      document.getElementById("compraTitulo").textContent = viniloEnProceso.titulo;
+      document.getElementById("compraArtista").textContent = viniloEnProceso.artista;
+      document.getElementById("compraFormato").textContent = viniloEnProceso.tamano;
+      document.getElementById("compraCantidad").textContent = "1 Unidad";
+      document.getElementById("compraPrecio").textContent = `$${Number(viniloEnProceso.precio).toFixed(2)}`;
+
+      document.getElementById("modalCompra").style.display = "flex";
+
+      await cargarVinilos(); 
+      
+    } catch (err) {
+      alert("Error del banco: " + err.message);
+    } finally {
+      btnPagar.textContent = "Pagar y Finalizar";
+      btnPagar.disabled = false;
+      btnPagar.style.opacity = "1";
+    }
+  }, 2000); 
+}
+
 function cerrarModalCompra() {
   document.getElementById("modalCompra").style.display = "none";
 }
